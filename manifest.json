@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "TaskFlux List Manager",
+    "version": "1.0",
+    "description": "Manage greenlist and blacklist for TaskFlux subreddits",
+    "permissions": [
+        "storage",
+        "activeTab"
+    ],
+    "host_permissions": [
+        "https://taskflux.net/*"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://taskflux.net/*"],
+            "js": ["Content.js"]
+        }
+    ]
+}

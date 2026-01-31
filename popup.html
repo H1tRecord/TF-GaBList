@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlux</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TaskFlux Greenlist and Blacklist Manager</h1>
+        </header>
+
+        <div id="statusMessage" class="status-message hidden"></div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="greenlist">✅ Greenlist</button>
+            <button class="tab-btn" data-tab="blacklist">🚫 Blacklist</button>
+        </div>
+
+        <div id="greenlist-tab" class="tab-content active">
+            <div class="list-header">
+                <span class="list-title">Approved Subreddits</span>
+                <button id="toggleGreenlist" class="toggle-btn enabled">Enabled</button>
+            </div>
+            <div class="list-controls">
+                <button id="removeDupsGreen" class="btn btn-secondary btn-small">Remove Duplicates</button>
+                <button id="clearGreenlist" class="btn btn-danger btn-small">Clear All</button>
+            </div>
+            <textarea id="greenlistInput" placeholder="Enter subreddits separated by commas (e.g., r/funny, r/pics)"></textarea>
+            <div class="count-display">
+                <span id="greenlistCount">0</span> subreddits
+            </div>
+        </div>
+
+        <div id="blacklist-tab" class="tab-content">
+            <div class="list-header">
+                <span class="list-title">Blocked Subreddits</span>
+                <button id="toggleBlacklist" class="toggle-btn enabled">Enabled</button>
+            </div>
+            <div class="list-controls">
+                <button id="removeDupsBlack" class="btn btn-secondary btn-small">Remove Duplicates</button>
+                <button id="clearBlacklist" class="btn btn-danger btn-small">Clear All</button>
+            </div>
+            <textarea id="blacklistInput" placeholder="Enter subreddits separated by commas (e.g., r/spam, r/ads)"></textarea>
+            <div class="count-display">
+                <span id="blacklistCount">0</span> subreddits
+            </div>
+        </div>
+
+        <div class="footer">
+            <button id="saveBtn" class="btn btn-primary btn-large">💾 Save Changes</button>
+        </div>
+
+        <div class="credits">
+            <p>Made by <a href="https://github.com/H1tRecord" target="_blank">H1tRecord</a></p>
+            <p>
+                <a href="https://github.com/H1tRecord/TF-GaBList" target="_blank">⭐ Star on GitHub</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
