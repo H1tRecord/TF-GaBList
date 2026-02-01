@@ -4,12 +4,23 @@ A Chrome extension to manage greenlist and blacklist for TaskFlux subreddits.
 
 ## Installation
 
-1. Download or clone this repository to your computer
-2. Open Chrome and go to `chrome://extensions/`
-3. Enable **Developer mode** (toggle in the top right corner)
-4. Click **Load unpacked**
-5. Select the folder containing the extension files
-6. The extension icon will appear in your browser toolbar
+1. Download the source.zip file
+2. Extract the files
+3. Open your browser’s extensions page:
+   * Chrome / Brave / Opera: `chrome://extensions/`
+   * Microsoft Edge: `edge://extensions/`
+   * Firefox: `about:addons`
+4. Enable **Developer Mode**:
+   * For Chrome, Edge, Brave, and Opera: Toggle **Developer mode** (usually in the top-right corner)
+   * For Firefox: Open **Extensions** → Click the gear icon ⚙️ → Select **Debug Add-ons**
+5. Load the extension:
+   * Chrome / Edge / Brave / Opera:
+     * Click **Load unpacked**
+     * Select the folder containing the extension files
+   * Firefox (Temporary Installation):
+     * Click **Load Temporary Add-on**
+     * Select `manifest.json` from the extension folder
+6. The extension icon will appear in your browser toolbar (you may need to pin it)
 
 ## Usage
 
