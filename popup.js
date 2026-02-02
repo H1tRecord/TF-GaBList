@@ -59,6 +59,9 @@ function initializeEventListeners() {
     document.getElementById('toggleGreenlist').addEventListener('click', () => toggleList('greenlist'));
     document.getElementById('toggleBlacklist').addEventListener('click', () => toggleList('blacklist'));
     
+    document.getElementById('autoFormatGreen').addEventListener('click', () => autoFormatSubreddits('greenlist'));
+    document.getElementById('autoFormatBlack').addEventListener('click', () => autoFormatSubreddits('blacklist'));
+    
     document.getElementById('removeDupsGreen').addEventListener('click', () => removeDuplicates('greenlist'));
     document.getElementById('removeDupsBlack').addEventListener('click', () => removeDuplicates('blacklist'));
     
@@ -126,6 +129,37 @@ function toggleList(listType) {
     } else {
         CONFIG.blacklistEnabled = !CONFIG.blacklistEnabled;
         updateToggleButton('blacklist', CONFIG.blacklistEnabled);
+    }
+}
+
+function autoFormatSubreddits(listType) {
+    const input = document.getElementById(listType === 'greenlist' ? 'greenlistInput' : 'blacklistInput');
+    // Split by commas, newlines, or any combination of whitespace/separators
+    const items = input.value.split(/[,\n\r]+/)
+        .map(item => item.trim())
+        .filter(Boolean);
+    
+    let formatted = 0;
+    const formattedItems = items.map(item => {
+        // Remove leading/trailing slashes for clean processing
+        let clean = item.replace(/^\/+/, '').replace(/\/+$/, '');
+        
+        // Check if it already starts with r/ (case insensitive)
+        if (!clean.toLowerCase().startsWith('r/')) {
+            formatted++;
+            return 'r/' + clean;
+        }
+        return clean;
+    });
+    
+    // Join with comma and space, no newlines
+    input.value = formattedItems.join(', ');
+    updateCounts();
+    
+    if (formatted > 0) {
+        showStatus(`Formatted ${formattedItems.length} subreddit(s), added r/ to ${formatted}`, 'success');
+    } else {
+        showStatus(`Formatted ${formattedItems.length} subreddit(s)`, 'info');
     }
 }
 
