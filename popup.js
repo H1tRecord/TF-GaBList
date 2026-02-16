@@ -89,12 +89,10 @@ function updateToggleButton(listType, isEnabled) {
     const textarea = document.getElementById(listType === 'greenlist' ? 'greenlistInput' : 'blacklistInput');
     
     if (isEnabled) {
-        btn.textContent = 'Enabled';
         btn.classList.remove('disabled');
         btn.classList.add('enabled');
         textarea.disabled = false;
     } else {
-        btn.textContent = 'Disabled';
         btn.classList.remove('enabled');
         btn.classList.add('disabled');
         textarea.disabled = true;
@@ -134,33 +132,76 @@ function toggleList(listType) {
 
 function autoFormatSubreddits(listType) {
     const input = document.getElementById(listType === 'greenlist' ? 'greenlistInput' : 'blacklistInput');
-    // Split by commas, newlines, or any combination of whitespace/separators
-    const items = input.value.split(/[,\n\r]+/)
+    
+    // Split by commas, newlines, tabs, semicolons, pipes, or multiple spaces
+    const items = input.value.split(/[,\n\r\t;|]+|\s{2,}/)
         .map(item => item.trim())
         .filter(Boolean);
     
     let formatted = 0;
+    let urlsExtracted = 0;
+    let invalidRemoved = 0;
+    
     const formattedItems = items.map(item => {
-        // Remove leading/trailing slashes for clean processing
-        let clean = item.replace(/^\/+/, '').replace(/\/+$/, '');
+        let clean = item;
         
-        // Check if it already starts with r/ (case insensitive)
+        // Extract subreddit from Reddit URLs (various formats)
+        const urlMatch = clean.match(/(?:reddit\.com|redd\.it)\/r\/([a-zA-Z0-9_]+)/i);
+        if (urlMatch) {
+            clean = urlMatch[1];
+            urlsExtracted++;
+        }
+        
+        // Remove leading/trailing slashes and whitespace
+        clean = clean.replace(/^[\s\/]+/, '').replace(/[\s\/]+$/, '');
+        
+        // Handle duplicate r/ prefixes (e.g., "r/r/subreddit")
+        while (/^r\/r\//i.test(clean)) {
+            clean = clean.replace(/^r\//i, '');
+        }
+        
+        // Remove r/ prefix temporarily for validation
+        let subredditName = clean.replace(/^r\//i, '');
+        
+        // Remove invalid characters (subreddits can only have letters, numbers, underscores)
+        subredditName = subredditName.replace(/[^a-zA-Z0-9_]/g, '');
+        
+        // Skip if empty after cleaning
+        if (!subredditName) {
+            invalidRemoved++;
+            return null;
+        }
+        
+        // Add r/ prefix with consistent lowercase 'r'
         if (!clean.toLowerCase().startsWith('r/')) {
             formatted++;
-            return 'r/' + clean;
         }
-        return clean;
-    });
+        return 'r/' + subredditName;
+    }).filter(Boolean);
     
-    // Join with comma and space, no newlines
-    input.value = formattedItems.join(', ');
+    // Remove case-insensitive duplicates, keeping first occurrence
+    const seen = new Set();
+    const uniqueItems = formattedItems.filter(item => {
+        const lower = item.toLowerCase();
+        if (seen.has(lower)) return false;
+        seen.add(lower);
+        return true;
+    });
+    const dupsRemoved = formattedItems.length - uniqueItems.length;
+    
+    // Join with comma and space
+    input.value = uniqueItems.join(', ');
     updateCounts();
     
-    if (formatted > 0) {
-        showStatus(`Formatted ${formattedItems.length} subreddit(s), added r/ to ${formatted}`, 'success');
-    } else {
-        showStatus(`Formatted ${formattedItems.length} subreddit(s)`, 'info');
-    }
+    // Build status message
+    const messages = [];
+    if (uniqueItems.length > 0) messages.push(`${uniqueItems.length} subreddit(s)`);
+    if (formatted > 0) messages.push(`${formatted} prefixed`);
+    if (urlsExtracted > 0) messages.push(`${urlsExtracted} URL(s) extracted`);
+    if (dupsRemoved > 0) messages.push(`${dupsRemoved} duplicate(s) removed`);
+    if (invalidRemoved > 0) messages.push(`${invalidRemoved} invalid removed`);
+    
+    showStatus(messages.length > 0 ? messages.join(', ') : 'No changes needed', 'success');
 }
 
 function removeDuplicates(listType) {
@@ -187,7 +228,7 @@ function clearList(listType) {
     }
 }
 
-function saveChanges() {
+async function saveChanges() {
     const greenlist = normalizeSubreddits(document.getElementById('greenlistInput').value);
     const blacklist = normalizeSubreddits(document.getElementById('blacklistInput').value);
     
@@ -204,16 +245,38 @@ function saveChanges() {
     CONFIG.greenlistedSubreddits = greenlist;
     CONFIG.blacklistedSubreddits = blacklist;
     
-    saveSettings();
+    await saveSettings();
+    updateUI();
 }
 
 function normalizeSubreddits(input) {
     if (!input || input.trim() === '') return [];
     
-    return [...new Set(
-        input.split(',')
-            .map(item => item.trim())
-            .map(item => item.replace(/^\/+/, '').replace(/\/+$/, ''))
-            .filter(Boolean)
-    )];
+    const items = input.split(/[,\n\r\t;|]+|\s{2,}/)
+        .map(item => item.trim())
+        .filter(Boolean)
+        .map(item => {
+            let clean = item;
+            
+            // Extract from Reddit URLs
+            const urlMatch = clean.match(/(?:reddit\.com|redd\.it)\/r\/([a-zA-Z0-9_]+)/i);
+            if (urlMatch) clean = urlMatch[1];
+            
+            // Clean up formatting
+            clean = clean.replace(/^[\s\/]+/, '').replace(/[\s\/]+$/, '');
+            while (/^r\/r\//i.test(clean)) clean = clean.replace(/^r\//i, '');
+            
+            let name = clean.replace(/^r\//i, '').replace(/[^a-zA-Z0-9_]/g, '');
+            return name ? 'r/' + name : null;
+        })
+        .filter(Boolean);
+    
+    // Case-insensitive deduplication
+    const seen = new Set();
+    return items.filter(item => {
+        const lower = item.toLowerCase();
+        if (seen.has(lower)) return false;
+        seen.add(lower);
+        return true;
+    });
 }
