@@ -374,10 +374,13 @@
         }
 
         try {
-            const path = new URL(url).pathname.replace(/^\/+/, '').toLowerCase();
+            // Extract and normalize path: /r/sidehustle/ -> r/sidehustle
+            const path = new URL(url).pathname.replace(/^\/+/, '').replace(/\/+$/, '').toLowerCase();
             return CONFIG.blacklistedSubreddits.some(subredditPath => {
-                let normalized = subredditPath.toLowerCase().replace(/\/+$/, '') + '/';
-                return path.startsWith(normalized);
+                // Normalize subreddit: r/sidehustle or /r/sidehustle/ -> r/sidehustle
+                let normalized = subredditPath.toLowerCase().replace(/^\/+/, '').replace(/\/+$/, '');
+                // Match exact or with subpath
+                return path === normalized || path.startsWith(normalized + '/');
             });
         } catch (error) {
             return false;
@@ -390,10 +393,13 @@
         }
 
         try {
-            const path = new URL(url).pathname.replace(/^\/+/, '').toLowerCase();
+            // Extract and normalize path: /r/sidehustle/ -> r/sidehustle
+            const path = new URL(url).pathname.replace(/^\/+/, '').replace(/\/+$/, '').toLowerCase();
             return CONFIG.greenlistedSubreddits.some(subredditPath => {
-                let normalized = subredditPath.toLowerCase().replace(/\/+$/, '') + '/';
-                return path.startsWith(normalized);
+                // Normalize subreddit: r/sidehustle or /r/sidehustle/ -> r/sidehustle
+                let normalized = subredditPath.toLowerCase().replace(/^\/+/, '').replace(/\/+$/, '');
+                // Match exact or with subpath
+                return path === normalized || path.startsWith(normalized + '/');
             });
         } catch (error) {
             return false;
