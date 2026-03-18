@@ -407,7 +407,7 @@
     }
 
     function styleClaimButtons() {
-        const taskCards = document.querySelectorAll('.bg-white');
+        const taskCards = document.querySelectorAll('.bg-bg-white-0, .bg-white');
 
         taskCards.forEach(card => {
             const urlElement = card.querySelector('a[href*="reddit.com"]');
